@@ -2,61 +2,137 @@
 @model SistemaAcademia.Pages.IndexModel
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
-    ViewData["Title"] = "Gestão de Alunos";
+    ViewData["Title"] = "Sistema Academia - TP4";
 }
 
 <div class="container mt-4">
-    <h2 class="mb-3">Cadastrar Novo Aluno</h2>
-
-    <form method="post" class="card p-4 mb-5 shadow-sm">
-        <div class="mb-3">
-            <label class="form-label">Matrícula:</label>
-            <input type="number" asp-for="NovoAluno.Matricula" class="form-control" required />
+    <h2 class="mb-3">1. Cadastrar Novo Aluno (UC01)</h2>
+    <form method="post" asp-page-handler="CadastrarAluno" class="card p-4 mb-4 shadow-sm">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Matrícula:</label>
+                <input type="number" asp-for="NovoAluno.Matricula" class="form-control" required />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Nome:</label>
+                <input type="text" asp-for="NovoAluno.Nome" class="form-control" required />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">CPF:</label>
+                <input type="text" asp-for="NovoAluno.Cpf" class="form-control" required />
+            </div>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Nome:</label>
-            <input type="text" asp-for="NovoAluno.Nome" class="form-control" required />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">CPF:</label>
-            <input type="text" asp-for="NovoAluno.Cpf" class="form-control" required />
-        </div>
-        <button type="submit" class="btn btn-primary">Gravar no Arquivo CSV</button>
+        <button type="submit" class="btn btn-primary">Cadastrar Aluno</button>
     </form>
 
-    <h2 class="mb-3">Alunos Registados no Sistema</h2>
-    <p class="text-muted">Dados lidos diretamente do ficheiro .csv</p>
-
-    <table class="table table-striped table-bordered shadow-sm">
+    <h2 class="mb-3">2. Alunos Registrados e Controle de Trancamento (UC01 - A1)</h2>
+    <table class="table table-striped table-bordered shadow-sm mb-5">
         <thead class="table-dark">
             <tr>
                 <th>Matrícula</th>
                 <th>Nome</th>
                 <th>CPF</th>
                 <th>Status</th>
+                <th>Motivo Inativação</th>
+                <th>Ação (Recepção)</th>
             </tr>
         </thead>
         <tbody>
-            @if (Model.Alunos != null)
+            @foreach (var aluno in Model.Alunos)
             {
-                @foreach (var aluno in Model.Alunos)
-                {
-                    <tr>
-                        <td>@aluno.Matricula</td>
-                        <td>@aluno.Nome</td>
-                        <td>@aluno.Cpf</td>
-                        <td>
-                            @if (aluno.StatusAtivo)
-                            {
-                                <span class="badge bg-success">Ativo</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger">Inativo</span>
-                            }
-                        </td>
-                    </tr>
-                }
+                <tr>
+                    <td>@aluno.Matricula</td>
+                    <td>@aluno.Nome</td>
+                    <td>@aluno.Cpf</td>
+                    <td>
+                        @if (aluno.StatusAtivo)
+                        {
+                            <span class="badge bg-success">Ativo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Inativo</span>
+                        }
+                    </td>
+                    <td>@aluno.MotivoInativacao</td>
+                    <td>
+                        @if (aluno.StatusAtivo)
+                        {
+                            <form method="post" asp-page-handler="InativarAluno" class="d-flex gap-2">
+                                <input type="hidden" name="matricula" value="@aluno.Matricula" />
+                                <input type="text" name="motivo" placeholder="Motivo" class="form-control form-control-sm" required />
+                                <button type="submit" class="btn btn-warning btn-sm">Trancar</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Matrícula Trancada</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h2 class="mb-3">3. Simulação de Acesso na Catraca (UC02)</h2>
+    <form method="post" asp-page-handler="SimularCatraca" class="card p-4 mb-4 shadow-sm">
+        <div class="input-group">
+            <input type="number" name="matriculaCatraca" placeholder="Digite a matrícula do aluno" class="form-control" required />
+            <button type="submit" class="btn btn-dark">Validar Acesso na Catraca</button>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.MensagemCatraca))
+        {
+            <div class="alert alert-info mt-3 mb-0">@Model.MensagemCatraca</div>
+        }
+    </form>
+
+    <h2 class="mb-3">4. Registrar Avaliação Física (UC04)</h2>
+    <form method="post" asp-page-handler="RegistrarAvaliacao" class="card p-4 mb-4 shadow-sm">
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Matrícula do Aluno:</label>
+                <input type="number" asp-for="NovaAvaliacao.MatriculaAluno" class="form-control" required />
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Peso (kg):</label>
+                <input type="number" step="0.1" asp-for="NovaAvaliacao.Peso" class="form-control" required />
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Altura (m):</label>
+                <input type="number" step="0.01" asp-for="NovaAvaliacao.Altura" class="form-control" required />
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">% Gordura:</label>
+                <input type="number" step="0.1" asp-for="NovaAvaliacao.PercentualGordura" class="form-control" required />
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success">Calcular IMC e Salvar Avaliação</button>
+    </form>
+
+    <table class="table table-striped table-bordered shadow-sm mb-5">
+        <thead class="table-dark">
+            <tr>
+                <th>Matrícula</th>
+                <th>Data</th>
+                <th>Peso (kg)</th>
+                <th>Altura (m)</th>
+                <th>% Gordura</th>
+                <th>IMC</th>
+                <th>Classificação</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var av in Model.Avaliacoes)
+            {
+                <tr>
+                    <td>@av.MatriculaAluno</td>
+                    <td>@av.DataAvaliacao.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@av.Peso</td>
+                    <td>@av.Altura</td>
+                    <td>@av.PercentualGordura%</td>
+                    <td><strong>@av.Imc</strong></td>
+                    <td>@av.ClassificarIMC()</td>
+                </tr>
             }
         </tbody>
     </table>
