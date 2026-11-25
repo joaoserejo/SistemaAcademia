@@ -1,4 +1,4 @@
-﻿# SistemaAcademia
+
 # 🏋️ SistemaAcademia — Sistema de Gerenciamento de Academia
 
 Aplicação web desenvolvida em **C# (ASP.NET Core Razor Pages)** para informatizar a rotina operacional de uma academia de ginástica, abrangendo controle de matrículas, validação de acesso em catraca, prescrição de treinos, avaliações físicas e gestão financeira.
